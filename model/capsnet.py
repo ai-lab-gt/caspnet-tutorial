@@ -18,20 +18,6 @@ def squash(input):
     return (squared_norm/(1+squared_norm))*(input/norm)
 
 
-conv1_params = {
-    "in_channels": 1,
-    "out_channels": 256,
-    "kernel_size": 9,
-    "stride": 1
-}
-
-conv2_params = {
-    "in_channels": 256,
-    "out_channels": 8,
-    "kernel_size": 9,
-    "stride": 2
-}
-
 class PrimaryCapsules(nn.Module):
     """
     Primary Capsule Network on MNIST.
@@ -129,67 +115,3 @@ class CapsNet(nn.Module):
         reconstruction = self.decoder(v)
         print('reconstruction size', reconstruction.size())
         return v, reconstruction
-
-
-def reconstruction_loss(v, target, image):
-
-    pass
-
-def margin_loss(v, target, batch_size):
-    l = 0.5
-    m = 0.9
-    T = target.type(torch.FloatTensor)
-    norm = torch.norm(v)
-    zeros = Variable(torch.zeros(norm.size()))
-    # L_k = T_k max(0, m^+ − ||v_k||)^2 + λ (1 − T_k) max(0, ||v_k|| − m^−)^2
-    L = T * torch.max(zeros, m - norm) ** 2 + l * (1 -T) * torch.max(zeros, norm - (1. - m)) ** 2
-    return torch.sum(L) / batch_size
-
-def train(model, epochs=100, dataset='mnist', lr=0.001):
-
-    torch.manual_seed(42)
-
-    data_dir = "./data/"
-
-    if dataset == 'mnist':
-        train_loader = torch.utils.data.DataLoader(
-            datasets.MNIST(data_dir, train=True, download=True,
-                        transform=transforms.Compose([
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.30801,))
-                        ])),
-            batch_size=64, shuffle=True)
-    elif dataset == 'fashion-mnist':
-        train_loader = torch.utils.data.DataLoader(
-            datasets.FashionMNIST(data_dir, train=True, download=True,
-                        transform=transforms.Compose([
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.1307,), (0.30801,))
-                        ])),
-            batch_size=64, shuffle=True)
-    else:
-        print('Only accepts mnist | fashion-mnist')
-    
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-    model.train()
-    for epoch in range(epochs):
-        for batch_idx, (data, target) in enumerate(train_loader):
-            test_sample = data
-            batch_size = test_sample.size()[0]
-            # print(f"Sample size: {test_sample.size()}")
-            output, reconstruction = model(data)
-            L = loss(output, target, batch_size)
-            L.backward()
-
-            step = batch_idx + epoch
-            if epoch % 10 == 0:
-                tqdm.write(f'Epoch: {step}    Loss: {L.data.item()}')
-
-            optimizer.step()
-
-
-# NOTE. What parameters would we like to experiment with?
-# num of capsules in PrimaryCaps? Capsule Dimensions? Conv params?
-model = CapsNet(conv1_params, conv2_params)
-train(model)
