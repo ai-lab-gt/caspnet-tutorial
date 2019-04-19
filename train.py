@@ -44,7 +44,7 @@ def train(model, epochs=100, dataset='mnist', lr=0.001):
 
             step = batch_idx + epoch
             if epoch % 10 == 0:
-                tqdm.write(f'Epoch: {step}    Loss: {L.data.item()}')
+                tqdm.tqdm.write(f'Epoch: {step}    Loss: {L.data.item()}')
 
             optimizer.step()
 
@@ -57,9 +57,10 @@ conv1_params = {
 
 conv2_params = {
     "in_channels": 256,
-    "out_channels": 8,
+    "out_channels": 32,
     "kernel_size": 9,
-    "stride": 2
+    "stride": 2,
+    "padding": 0,
 }
 
 # NOTE. What parameters would we like to experiment with?

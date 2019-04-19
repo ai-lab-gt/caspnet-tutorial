@@ -23,3 +23,4 @@ nb = nbf.v4.new_notebook()
 nb['cells'] = cells
 
 nbf.write(nb, NOTEBOOK_NAME)
+print('Wrote', NOTEBOOK_NAME, 'succesfully')
